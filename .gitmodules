@@ -1,0 +1,3 @@
+[submodule "Onet-Connect/Assets/TGS.Core"]
+	path = Onet-Connect/Assets/TGS.Core
+	url = git@github.com:Titan-Game-Studio/TGS.Core.git
