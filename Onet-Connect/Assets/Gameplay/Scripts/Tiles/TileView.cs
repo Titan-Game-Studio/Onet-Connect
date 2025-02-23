@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using TGS.OnetConnect.Gameplay.Scripts.Tiles;
+using TGS.OnetConnect.Gameplay.Scripts.Utilities;
 using UnityEngine;
 using Zenject;
 
@@ -5,65 +9,82 @@ namespace TGS.OnetConnect
 {
     public class TileView : MonoBehaviour
     {
-        [SerializeField] MeshRenderer _renderer = null;
+        [SerializeField] private MeshRenderer _renderer = null;
+        [SerializeField] private Collider _collider = null;
+        [SerializeField] private Rigidbody _rigidBody = null;
 
-        [SerializeField] Collider _collider = null;
+        [SerializeField] private Transform _monterContainer;
+        [SerializeField] private Transform _markSelectedContainer;
+        [SerializeField] private EventsHandler _eventsHandler = null;
 
-        [SerializeField] Rigidbody _rigidBody = null;
+        [SerializeField] private List<GameObject> _monterPrefabs = new List<GameObject>();
 
-        [Inject] public Tile Tile { get; set; }
+        [Inject] public TileModel TileModel { get; set; }
 
-        public MeshRenderer Renderer
+        public Action OnTileSelectedAtc = null;
+        public Action OnTileDeselectedAtc = null;
+
+        public GameObject Initialize()
         {
-            get { return _renderer; }
+            _eventsHandler.AtcPointerDown += OnTileSelected;
+            
+            int index = (int)TileModel.Tunables.Type;
+            if (index < 0 || index >= _monterPrefabs.Count)
+            {
+                // Instantiate empty & block
+                return null;
+            }
+
+            return Instantiate(_monterPrefabs[(int)TileModel.Tunables.Type], _monterContainer);
         }
 
-        public Collider Collider
-        {
-            get { return _collider; }
-        }
+        public MeshRenderer Renderer => _renderer;
 
-        public Rigidbody Rigidbody
-        {
-            get { return _rigidBody; }
-        }
+        public Collider Collider => _collider;
 
-        public Vector3 LookDir
-        {
-            get { return -_rigidBody.transform.right; }
-        }
+        public Rigidbody Rigidbody => _rigidBody;
 
-        public Vector3 RightDir
-        {
-            get { return _rigidBody.transform.up; }
-        }
+        public EventsHandler EventsHandler => _eventsHandler;
 
-        public Vector3 ForwardDir
-        {
-            get { return _rigidBody.transform.right; }
-        }
+        public Vector3 LookDir => -_rigidBody.transform.right;
+
+        public Vector3 RightDir => _rigidBody.transform.up;
+
+        public Vector3 ForwardDir => _rigidBody.transform.right;
 
         public Vector3 Position
         {
-            get { return _rigidBody.transform.position; }
-            set { _rigidBody.transform.position = value; }
+            get => _rigidBody.transform.position;
+            set => _rigidBody.transform.position = value;
         }
 
         public Quaternion Rotation
         {
-            get { return _rigidBody.rotation; }
-            set { _rigidBody.rotation = value; }
+            get => _rigidBody.rotation;
+            set => _rigidBody.rotation = value;
         }
 
-        public Vector3 Velocity
-        {
-            get { return _rigidBody.linearVelocity; }
-        }
+        public Vector3 Velocity => _rigidBody.linearVelocity;
 
         public Vector3 AngularVelocity
         {
-            get { return _rigidBody.angularVelocity; }
-            set { _rigidBody.angularVelocity = value; }
+            get => _rigidBody.angularVelocity;
+            set => _rigidBody.angularVelocity = value;
+        }
+
+        public void OnTileSelected()
+        {
+            OnTileSelectedAtc?.Invoke();
+        }
+
+        public void OnTileDeselected()
+        {
+            OnTileDeselectedAtc?.Invoke();
+        }
+
+        private void SetActiveMarkSelected(bool isActive = false)
+        {
+            _markSelectedContainer.gameObject.SetActive(isActive);
         }
 
         public void AddForce(Vector3 force)

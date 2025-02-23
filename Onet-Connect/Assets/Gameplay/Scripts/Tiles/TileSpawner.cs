@@ -1,70 +1,112 @@
-using System;
+using System.Collections.Generic;
+using TGS.OnetConnect.Gameplay.Scripts.Boards;
 using UnityEngine;
 using Zenject;
-using Random = UnityEngine.Random;
 
-namespace TGS.OnetConnect
+namespace TGS.OnetConnect.Gameplay.Scripts.Tiles
 {
-    public class TileSpawner : ITickable, IInitializable
+    public class TileSpawner
     {
-        readonly Tile.Factory _tileFactory;
-        readonly SignalBus _signalBus;
-        readonly Settings _settings;
+        private readonly TileModel.Factory _tileFactory;
+        private BoardModel _board;
+        private TileModel[,] _tileModels;
 
-        private int _desiredNumTiles;
-        private int _tileCount;
-        private float _lastSpawnTime;
-
-        public TileSpawner(SignalBus signalBus, Tile.Factory tileFactory, Settings settings)
+        [Inject]
+        public TileSpawner(TileModel.Factory tileFactory)
         {
-            _signalBus = signalBus;
             _tileFactory = tileFactory;
-            _settings = settings;
         }
 
-        public void Initialize()
+        public TileModel[,] GenerateTileModels(BoardModel board, int[] tileTypes, float tileWidth, float tileHeight)
         {
-            // _signalBus.Subscribe<TileMatchedSignal>(OnTileMatched);
-        }
+            _board = board;
+            int boardWidth = _board.Tunables.Width;
+            int boardHeight = _board.Tunables.Height;
+            _tileModels = new TileModel[boardWidth, boardHeight];
 
-        private void OnTileMatched()
-        {
-            Debug.Log("OnTileMatched");
-        }
+            int totalTiles = (boardWidth - 2) * (boardHeight - 2);
+            int eachTypeCount = totalTiles / tileTypes.Length;
+            int extraCount = totalTiles % tileTypes.Length;
 
-        public void Tick()
-        {
-            if (_tileCount < 10 && Time.realtimeSinceStartup - _lastSpawnTime > _settings.MinDelayBetweenSpawns)
+            List<TileModel> tileList = new List<TileModel>();
+
+            foreach (var type in tileTypes)
             {
-                SpawnTile();
-                _tileCount++;
+                for (int i = 0; i < eachTypeCount + (extraCount > 0 ? 1 : 0); i++)
+                {
+                    TileModel tile = _tileFactory.Create(0, 0, type);
+                    tileList.Add(tile);
+                }
+
+                if (extraCount > 0)
+                {
+                    extraCount--;
+                }
+            }
+
+            Shuffle(tileList);
+
+            // TODO: REFACTOR
+            float center = 0f;
+            float halfBoardWidth = (boardWidth * tileWidth) / 2;
+            float halfBoardHeight = (boardHeight * tileHeight) / 2;
+
+            int index = 0;
+            for (int x = 0; x < boardWidth; x++)
+            {
+                for (int y = 0; y < boardHeight; y++)
+                {
+                    if(IsBorderTile(x, y,boardWidth,boardHeight))
+                    {
+                        _tileModels[x, y] = _tileFactory.Create(x, y, -1);
+                        _tileModels[x, y].OnSpawned(x, y, -1, null);
+                    }
+                    else
+                    {
+                        _tileModels[x, y] = tileList[index++];
+                    }
+
+                    TileModel tile = _tileModels[x, y];
+                    tile.Tunables.X = x;
+                    tile.Tunables.Y = y;
+                    // tile.Tunables.Width = tileWidth;
+                    // tile.Tunables.Height = tileHeight;
+
+                    Vector3 tilePosition = new Vector3(
+                        x * tileWidth - halfBoardWidth + (tileWidth / 2),
+                        center,
+                        y * tileHeight - halfBoardHeight + (tileHeight / 2)
+                    );
+
+                    tile.UpdateViewPosition(tilePosition);
+                    tile.UpdateName();
+                    tile.Initialize();
+                }
+            }
+
+            return _tileModels;
+        }
+
+        private void Shuffle(List<TileModel> list)
+        {
+            System.Random rng = new System.Random();
+            int n = list.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = rng.Next(n + 1);
+                (list[k], list[n]) = (list[n], list[k]);
             }
         }
 
-        private void SpawnTile()
+        private bool IsBorderTile(int x, int y, int gridWidth, int gridHeight)
         {
-            int x = Random.Range(_settings.XMin, _settings.XMax);
-            int y = Random.Range(_settings.YMin, _settings.YMax);
-            int type = Random.Range(_settings.TypeMin, _settings.TypeMax);
-
-            Tile tile = _tileFactory.Create(x, y, type);
-            tile.OnBizz();
-            _lastSpawnTime = Time.realtimeSinceStartup;
+            return x == 0 || x == gridWidth - 1 || y == 0 || y == gridHeight - 1;
         }
 
-        [Serializable]
-        public class Settings
+        private bool IsWithinSquare(Vector3 position, float halfBoardWidth, float halfBoardHeight)
         {
-            public int XMin;
-            public int XMax;
-
-            public int YMin;
-            public int YMax;
-
-            public int TypeMin;
-            public int TypeMax;
-
-            public float MinDelayBetweenSpawns = 0.5f;
+            return Mathf.Abs(position.x) <= halfBoardWidth && Mathf.Abs(position.z) <= halfBoardHeight;
         }
     }
 }

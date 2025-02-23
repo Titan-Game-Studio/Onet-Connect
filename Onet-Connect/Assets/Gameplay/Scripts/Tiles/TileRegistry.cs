@@ -1,22 +1,21 @@
-
 using System.Collections.Generic;
 
-namespace TGS.OnetConnect
+namespace TGS.OnetConnect.Gameplay.Scripts.Tiles
 {
     public class TileRegistry
     {
-        readonly List<Tile> _tiles = new List<Tile>();
+        readonly List<TileModel> _tiles = new List<TileModel>();
         
-        public IEnumerable<Tile> Tiles => _tiles;
+        public IEnumerable<TileModel> Tiles => _tiles;
 
-        public void RegisterTile(Tile tile)
+        public void RegisterTile(TileModel tileModel)
         {
-            _tiles.Add(tile);
+            _tiles.Add(tileModel);
         }
 
-        public void UnregisterTile(Tile tile)
+        public void UnregisterTile(TileModel tileModel)
         {
-            _tiles.Remove(tile);
+            _tiles.Remove(tileModel);
         }
     }
 }
