@@ -5,14 +5,14 @@ using Zenject;
 
 namespace TGS.OnetConnect.Gameplay.Scripts.Boards
 {
-    public class BoardModel : IDisposable
+    public class BoardModel : BoardModelBase
     {
         private readonly BoardTunables _tunables;
         private TileModel[,] _tileModelArray;
 
         public BoardModel(BoardTunables tunables)
         {
-            _tunables = tunables;
+            _tunables = tunables ?? throw new ArgumentNullException(nameof(tunables));
             InitializeTileArray();
         }
 
@@ -25,24 +25,37 @@ namespace TGS.OnetConnect.Gameplay.Scripts.Boards
             Debug.Log($"Tile array initialized: {_tunables.Width} x {_tunables.Height}");
         }
 
-        public TileModel[,] TileModelArray => _tileModelArray;
+        public override TileModel[,] TileModelArray => _tileModelArray;
 
-        public void SetTileArray(TileModel[,] tiles)
+        public override void SetTileArray(TileModel[,] tiles)
         {
+            if (tiles == null)
+                throw new ArgumentNullException(nameof(tiles));
+
+            if (tiles.GetLength(0) != _tunables.Width || tiles.GetLength(1) != _tunables.Height)
+                throw new ArgumentException("Tile array dimensions do not match BoardTunables!");
             _tileModelArray = tiles;
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
+            if (_tileModelArray == null)
+            {
+                return;
+            }
+
             foreach (var tile in _tileModelArray)
             {
                 tile?.Dispose();
             }
+
             _tileModelArray = null;
         }
-        
-        public BoardTunables Tunables => _tunables;
 
-        public class Factory : PlaceholderFactory<BoardTunables, BoardModel> { }
+        public override BoardTunables Tunables => _tunables;
+
+        public class Factory : PlaceholderFactory<BoardTunables, BoardModel>
+        {
+        }
     }
 }

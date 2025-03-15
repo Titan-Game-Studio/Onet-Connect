@@ -7,11 +7,11 @@ namespace TGS.OnetConnect.Gameplay.Scripts.Utilities
     public class EventsHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerClickHandler,
         IPointerEnterHandler, IPointerExitHandler
     {
-        public Action AtcPointerDown;
-        public Action AtcPointerUp;
-        public Action AtcPointerClick;
-        public Action AtcPointerEnter;
-        public Action AtcPointerExit;
+        public Action PointerDownAtc;
+        public Action PointerUpAtc;
+        public Action PointerClickAtc;
+        public Action PointerEnterAtc;
+        public Action PointerExitAtc;
 
         private bool _isEnabled;
 
@@ -26,8 +26,8 @@ namespace TGS.OnetConnect.Gameplay.Scripts.Utilities
             {
                 return;
             }
-
-            AtcPointerDown?.Invoke();
+            
+            PointerDownAtc?.Invoke();
         }
 
         public void OnPointerUp(PointerEventData eventData)
@@ -37,7 +37,7 @@ namespace TGS.OnetConnect.Gameplay.Scripts.Utilities
                 return;
             }
 
-            AtcPointerUp?.Invoke();
+            PointerUpAtc?.Invoke();
         }
 
         public void OnPointerClick(PointerEventData eventData)
@@ -47,7 +47,7 @@ namespace TGS.OnetConnect.Gameplay.Scripts.Utilities
                 return;
             }
 
-            AtcPointerClick?.Invoke();
+            PointerClickAtc?.Invoke();
         }
 
         public void OnPointerEnter(PointerEventData eventData)
@@ -57,7 +57,7 @@ namespace TGS.OnetConnect.Gameplay.Scripts.Utilities
                 return;
             }
 
-            AtcPointerEnter?.Invoke();
+            PointerEnterAtc?.Invoke();
         }
 
         public void OnPointerExit(PointerEventData eventData)
@@ -67,7 +67,7 @@ namespace TGS.OnetConnect.Gameplay.Scripts.Utilities
                 return;
             }
 
-            AtcPointerExit?.Invoke();
+            PointerExitAtc?.Invoke();
         }
     }
 }

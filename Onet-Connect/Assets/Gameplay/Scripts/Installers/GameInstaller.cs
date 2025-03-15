@@ -19,6 +19,7 @@ public class GameInstaller : MonoInstaller
 
         GameSignalsInstaller.Install(Container);
 
+        Container.DeclareSignal<TileSelectedSignal>();
         Container.DeclareSignal<TileMatchedSignal>();
 
         #endregion /SIGNALS
@@ -35,7 +36,7 @@ public class GameInstaller : MonoInstaller
         Container.BindFactory<BoardTunables, BoardModel, BoardModel.Factory>().AsSingle();
         
         // Bind BoardView from Prefab
-        Container.BindFactory<BoardModel, BoardView, BoardView.Factory>()
+        Container.BindFactory<IBoardModel, BoardView, BoardView.Factory>()
             .FromComponentInNewPrefab(_settings.BoardfPrefab)
             .UnderTransformGroup("BoardViews")
             .AsSingle();

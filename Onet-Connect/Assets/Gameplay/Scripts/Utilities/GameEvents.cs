@@ -14,6 +14,11 @@ namespace TGS.OnetConnect
     public struct TileSelectedSignal
     {
         public TileModel TileSelected;
+
+        public TileSelectedSignal(TileModel tileSelected)
+        {
+            TileSelected = tileSelected;
+        }
     }
 
     public struct TileMatchedSignal

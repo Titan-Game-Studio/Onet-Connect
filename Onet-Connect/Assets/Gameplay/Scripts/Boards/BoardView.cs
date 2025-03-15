@@ -17,10 +17,10 @@ namespace TGS.OnetConnect.Gameplay.Scripts.Boards
         [SerializeField] private MeshRenderer _renderer;
         [SerializeField] private Transform[] _corners;
 
-        private BoardModel _boardModel;
+        private IBoardModel _boardModel;
 
         [Inject]
-        public void Construct(BoardModel boardModel)
+        public void Construct(IBoardModel boardModel)
         {
             _boardModel = boardModel;
         }
@@ -34,7 +34,7 @@ namespace TGS.OnetConnect.Gameplay.Scripts.Boards
         public Transform GetCorner(EBoardsCorner corner) => _corners[(int)corner];
         public Vector3 GetCornerPosition(EBoardsCorner corner) => _corners[(int)corner].position;
 
-        public class Factory : PlaceholderFactory<BoardModel, BoardView>
+        public class Factory : PlaceholderFactory<IBoardModel, BoardView>
         {
         }
     }

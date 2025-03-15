@@ -19,23 +19,31 @@ namespace TGS.OnetConnect
 
         [SerializeField] private List<GameObject> _monterPrefabs = new List<GameObject>();
 
-        [Inject] public TileModel TileModel { get; set; }
+        [Inject] public TileModel _tileModel;
 
-        public Action OnTileSelectedAtc = null;
-        public Action OnTileDeselectedAtc = null;
-
-        public GameObject Initialize()
+        public void Initialize(TileModel tileModel)
         {
-            _eventsHandler.AtcPointerDown += OnTileSelected;
-            
-            int index = (int)TileModel.Tunables.Type;
-            if (index < 0 || index >= _monterPrefabs.Count)
+            _tileModel = tileModel;
+            int index = (int)_tileModel.Tunables.Type;
+            if (index >= 0 && index < _monterPrefabs.Count)
             {
                 // Instantiate empty & block
-                return null;
+                Instantiate(_monterPrefabs[(int)_tileModel.Tunables.Type], _monterContainer);
+                _eventsHandler.PointerDownAtc += PointerDownAtcHandler;
+                _eventsHandler.SetEnabled(true);
+            }
+            else
+            {
+                _eventsHandler.SetEnabled(false);
             }
 
-            return Instantiate(_monterPrefabs[(int)TileModel.Tunables.Type], _monterContainer);
+            OnTileDeselected();
+        }
+
+        private void PointerDownAtcHandler()
+        {
+            _eventsHandler.SetEnabled(false);
+            _tileModel.TileSelectedSignalHandler();
         }
 
         public MeshRenderer Renderer => _renderer;
@@ -72,17 +80,40 @@ namespace TGS.OnetConnect
             set => _rigidBody.angularVelocity = value;
         }
 
+        /// <summary>
+        /// Update Active Mark Selected
+        /// </summary>
         public void OnTileSelected()
         {
-            OnTileSelectedAtc?.Invoke();
+            // TODO: Refactor to state Selected.
+            SetActiveMarkSelected(true);
         }
 
+        /// <summary>
+        /// Update Active Mark Selected.
+        /// </summary>
         public void OnTileDeselected()
         {
-            OnTileDeselectedAtc?.Invoke();
+            // TODO: Refactor to state Deselected.
+            SetActiveMarkSelected(false);
+            _eventsHandler.SetEnabled(true);
         }
 
-        private void SetActiveMarkSelected(bool isActive = false)
+        /// <summary>
+        /// Set Empty.
+        /// </summary>
+        public void OnTileReset()
+        {
+            SetActiveMarkSelected(false);
+            SetActiveMonsterGameObject(false);
+        }
+
+        private void SetActiveMonsterGameObject(bool isActive)
+        {
+            _monterContainer.gameObject.SetActive(isActive);
+        }
+
+        private void SetActiveMarkSelected(bool isActive)
         {
             _markSelectedContainer.gameObject.SetActive(isActive);
         }

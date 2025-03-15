@@ -9,18 +9,13 @@ namespace TGS.OnetConnect.Gameplay.Scripts.Tiles
     public class TilePathFinder
     {
         private readonly BoardModel _board;
-        private readonly PathRenderer _line;
-        public bool RenderLine { get; set; }
-    
         public List<TileModel> FirstPassEmptyTiles { get; private set; } = new List<TileModel>();
         public List<TileModel> SecondPassEmptyTiles { get; private set; } = new List<TileModel>();
         public List<Vector3> LinePoints { get; private set; } = new List<Vector3>();
 
-        [Inject]
-        public TilePathFinder(BoardModel board, PathRenderer line)
+        public TilePathFinder(BoardModel board)
         {
             _board = board;
-            _line = line;
         }
 
         public bool IsPathValid(TileModel selectedTile1, TileModel selectedTile2)
@@ -60,8 +55,8 @@ namespace TGS.OnetConnect.Gameplay.Scripts.Tiles
 
         private bool IsStraightDirectionMatch(TileModel firstTile, TileModel secondTile, List<TileModel> emptyTilesInPath, int dx, int dy)
         {
-            int x = (int)firstTile.Position.x;
-            int y = (int)firstTile.Position.y;
+            int x = firstTile.Tunables.X;
+            int y = firstTile.Tunables.Y;
 
             for (int i = x + dx, j = y + dy; i >= 0 && i < _board.Tunables.Width && j >= 0 && j < _board.Tunables.Height; i += dx, j += dy)
             {
@@ -81,8 +76,8 @@ namespace TGS.OnetConnect.Gameplay.Scripts.Tiles
 
         private bool IsOneBendDirectionMatch(TileModel firstTile, TileModel secondTile, List<TileModel> firstList, List<TileModel> emptyTilesInPath, int dx, int dy)
         {
-            int x = (int)firstTile.Position.x;
-            int y = (int)firstTile.Position.y;
+            int x = firstTile.Tunables.X;
+            int y = firstTile.Tunables.Y;
 
             for (int i = x + dx, j = y + dy; i >= 0 && i < _board.Tunables.Width && j >= 0 && j < _board.Tunables.Height; i += dx, j += dy)
             {
@@ -105,8 +100,8 @@ namespace TGS.OnetConnect.Gameplay.Scripts.Tiles
         {
             foreach (TileModel tile in firstList)
             {
-                int x = (int)tile.Position.x;
-                int y = (int)tile.Position.y;
+                int x = tile.Tunables.X;
+                int y = tile.Tunables.Y;
 
                 for (int i = x + dx, j = y + dy; i >= 0 && i < _board.Tunables.Width && j >= 0 && j < _board.Tunables.Height; i += dx, j += dy)
                 {
@@ -128,12 +123,13 @@ namespace TGS.OnetConnect.Gameplay.Scripts.Tiles
 
         private void RenderMatchingLine(Vector3 startPoint, Vector3 endPoint)
         {
-            if (RenderLine && _line != null)
-            {
-                var lineInstance = Object.Instantiate(_line, Vector3.zero, Quaternion.identity);
-                lineInstance.startPoint = startPoint;
-                lineInstance.endPoint = endPoint;
-            }
+            Debug.Log($"Straight Line: {startPoint}, {endPoint}");
+            // if (RenderLine && _line != null)
+            // {
+            //     var lineInstance = Object.Instantiate(_line, Vector3.zero, Quaternion.identity);
+            //     lineInstance.startPoint = startPoint;
+            //     lineInstance.endPoint = endPoint;
+            // }
         }
     }
 }
